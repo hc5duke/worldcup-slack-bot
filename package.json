@@ -1,0 +1,22 @@
+{
+  "name": "worldcup-slack-bot",
+  "version": "1.0.0",
+  "description": "WorldCupBot will notify a Slack channel/group for every matches during a FIFA World Cup.",
+  "main": "worldcup.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hc5duke/worldcup-slack-bot.git"
+  },
+  "author": "@hc5duke",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hc5duke/worldcup-slack-bot/issues"
+  },
+  "homepage": "https://github.com/hc5duke/worldcup-slack-bot#readme",
+  "devDependencies": {
+    "jest": "^29.2.1"
+  }
+}
