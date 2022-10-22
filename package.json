@@ -18,5 +18,8 @@
   "homepage": "https://github.com/hc5duke/worldcup-slack-bot#readme",
   "devDependencies": {
     "jest": "^29.2.1"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1238.0"
   }
 }

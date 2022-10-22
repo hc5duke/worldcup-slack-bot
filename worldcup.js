@@ -25,13 +25,18 @@
  * @license MIT
  */
 
+// AWS stuff
+const AWS = require('aws-sdk')
+const s3  = new AWS.S3();
+
 // Slack stuff
 const SLACK_TOKEN      = process.env.SLACK_TOKEN
 const SLACK_CHANNEL    = '#test-circle-ci-app'
 const SLACK_BOT_NAME   = 'WorldCup Bot'
 const SLACK_BOT_AVATAR = 'https://i.imgur.com/Pd0cpqE.png'
 const DEBUG_MODE       = true
-const S3_FILE          = process.env.S3_FILE
+const S3_BUCKET        = process.env.S3_BUCKET
+const S3_KEY           = process.env.S3_KEY
 
 // Set to the language for updates
 const LOCALE = 'en-US'
@@ -110,4 +115,30 @@ const PERIOD_1ST_ET   = 7;
 const PERIOD_2ND_ET   = 9;
 const PERIOD_PENALTY  = 11;
 
-module.exports = {};
+/**
+ * Below this line, you should modify at your own risk
+ */
+
+const worldcup = {}
+
+worldcup.helpers = {
+  getLatestData: async (s3) => {
+    try {
+      var getParams = {
+        Bucket: S3_BUCKET,
+        Key:    S3_KEY
+      }
+      var obj = await s3.getObject(getParams).promise()
+      return obj.Body
+    } catch(e) {
+      console.error(e)
+    } finally {
+      return {
+        live_matches: [],
+        etag: {}
+      }
+    }
+  },
+}
+
+module.exports = worldcup
