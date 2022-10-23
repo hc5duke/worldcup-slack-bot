@@ -41,7 +41,7 @@ Here is a preview of the Colombia vs Japan match during the Russia World Cup 201
 
 ### Requirements
 
-  - PHP >= 5.3
+  - Node.js (AWS Lambda)
   - You need a token from Slack:
     - Jump at https://api.slack.com/custom-integrations/legacy-tokens (you have to login)
     - and you will find your token.
@@ -49,14 +49,4 @@ Here is a preview of the Colombia vs Japan match during the Russia World Cup 201
 ### Installation
 
   - Clone this repo
-  - Set up a cron to run every minute:
-
-  ````
-  * * * * * cd /path/to/folder && php worldCupNotifier.php >> worldCupNotifier.log
-  ````
-
-### Side notes
-
-The code is ugly but it works.
-
-Everything is posted in french, but feel free to fork and use your own language. FYI, FIFA API can provide text in en/fr/de/es/pt.
+  - Set up a lambda to run every minute
