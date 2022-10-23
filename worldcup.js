@@ -206,11 +206,11 @@ const worldcup = {
       ]
     }
 
-    return request(URL_SLACK + '?' + qs.encode(options))
+    return getUrl(URL_SLACK + '?' + qs.encode(options))
   },
 
   getEventPlayerAlias: async eventPlayerId => {
-    const response = await request(URL_PLAYERS + eventPlayerId)
+    const response = await getUrl(URL_PLAYERS + eventPlayerId)
     return response.Alias[0].Description
   },
 
