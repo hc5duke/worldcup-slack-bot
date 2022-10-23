@@ -118,11 +118,17 @@ const PERIOD_1ST_ET   = 7;
 const PERIOD_2ND_ET   = 9;
 const PERIOD_PENALTY  = 11;
 
+const MATCH_OPTS = {
+  idCompetition: ID_COMPETITION,
+  idSeason:      ID_SEASON,
+  count:         500,
+  language:      LOCALE
+}
 
 // URLs
 const URL_SLACK   = 'https://slack.com/api/chat.postMessage'
 const URL_PLAYERS = 'https://api.fifa.com/api/v1/players/'
-const URL_MATCHES = 'https://api.fifa.com/api/v1/calendar/matches'
+const URL_MATCHES = 'https://api.fifa.com/api/v1/calendar/matches' + '?' + qs.encode(MATCH_OPTS)
 
 /**
  * Below this line, you should modify at your own risk
@@ -141,7 +147,7 @@ const worldcup = {
       console.error(e)
     } finally {
       return {
-        live_matches: [],
+        liveMatches: [],
         etag: {}
       }
     }
@@ -214,7 +220,30 @@ const worldcup = {
     return response.Alias[0].Description
   },
 
-  run: () => {
+  parseMatches: (response, db) => {
+    if (response === null) return
+
+    const matches = response.Results
+    for (var i = 0, len = matches.length; i < len; i++) {
+      const match = matches[i]
+    }
+  },
+
+  updateLiveEvents: db => {
+  },
+
+  saveLatestData: (s3, db) => {
+  },
+
+  run: async () => {
+    const db = getLatestData(s3)
+
+    // we care about ETag with this
+    const response = await getUrl(URL_MATCHES)
+
+    worldcup.parseMatches(response, db)
+    worldcup.updateLiveEvents(db)
+    worldcup.saveLatestData(s3, db)
   }
 }
 
