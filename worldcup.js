@@ -25,9 +25,10 @@
  * @license MIT
  */
 
-// AWS stuff
-const AWS = require('aws-sdk')
-const s3  = new AWS.S3();
+const AWS   = require('aws-sdk')
+const https = require('https');
+
+const s3    = new AWS.S3();
 
 // Slack stuff
 const SLACK_TOKEN      = process.env.SLACK_TOKEN
@@ -139,6 +140,31 @@ worldcup.helpers = {
       }
     }
   },
+
+  // use https.request as async
+  request: (options, data) => {
+    return new Promise((resolve, reject) => {
+      const req = https.request(options, (res) => {
+        res.setEncoding('utf8');
+        let responseBody = '';
+
+        res.on('data', (chunk) => {
+          responseBody += chunk;
+        });
+
+        res.on('end', () => {
+          resolve(JSON.parse(responseBody));
+        });
+      });
+
+      req.on('error', (err) => {
+        reject(err);
+      });
+
+      req.write(data)
+      req.end();
+    });
+  }
 }
 
 module.exports = worldcup
