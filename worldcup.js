@@ -45,57 +45,57 @@ const S3_KEY           = process.env.S3_KEY
 const LOCALE = 'en-US'
 
 const i18n = {
-    'fr-FR': [
-        'Le match',
-        'est sur le point de commencer',
-        'Carton jaune',
-        'Carton rouge',
-        'But contre son camp',
-        'Pénalty',
-        'BUUUUUT',
-        'Pénalty manqué',
-        'commence',
-        'Mi-temps',
-        'Fin de la 2e période',
-        'a repris',
-        'Mi-temps de la prolongation',
-        'Fin de la prolongation',
-        'Fin de la séance de tirs au but',
-    ],
-    'es-ES': [
-        'El partido entre',
-        'está por comenzar',
-        'tarjeta amarilla',
-        'tarjeta roja',
-        'Autogol',
-        'Penalti',
-        'GOOOOOL',
-        'Penal fallado',
-        'ha comenzado',
-        'MEDIO TIEMPO',
-        'TIEMPO COMPLETO',
-        'se ha reanudado',
-        'la mitad de la prórroga',
-        'el final de la prórroga',
-        'tanda de penales',
-    ],
-    'en-GB': [
-        'The match between',
-        'is about to start',
-        'Yellow card',
-        'Red card',
-        'Own goal',
-        'Penalty',
-        'GOOOOAL',
-        'Missed penalty',
-        'has started',
-        'HALF TIME',
-        'FULL TIME',
-        'has resumed',
-        'END OF 1ST ET',
-        'END OF 2ND ET',
-        'END OF PENALTY SHOOTOUT',
-    ]
+  'fr-FR': [
+    'Le match',
+    'est sur le point de commencer',
+    'Carton jaune',
+    'Carton rouge',
+    'But contre son camp',
+    'Pénalty',
+    'BUUUUUT',
+    'Pénalty manqué',
+    'commence',
+    'Mi-temps',
+    'Fin de la 2e période',
+    'a repris',
+    'Mi-temps de la prolongation',
+    'Fin de la prolongation',
+    'Fin de la séance de tirs au but',
+  ],
+  'es-ES': [
+    'El partido entre',
+    'está por comenzar',
+    'tarjeta amarilla',
+    'tarjeta roja',
+    'Autogol',
+    'Penalti',
+    'GOOOOOL',
+    'Penal fallado',
+    'ha comenzado',
+    'MEDIO TIEMPO',
+    'TIEMPO COMPLETO',
+    'se ha reanudado',
+    'la mitad de la prórroga',
+    'el final de la prórroga',
+    'tanda de penales',
+  ],
+  'en-GB': [
+    'The match between',
+    'is about to start',
+    'Yellow card',
+    'Red card',
+    'Own goal',
+    'Penalty',
+    'GOOOOAL',
+    'Missed penalty',
+    'has started',
+    'HALF TIME',
+    'FULL TIME',
+    'has resumed',
+    'END OF 1ST ET',
+    'END OF 2ND ET',
+    'END OF PENALTY SHOOTOUT',
+  ]
 }
 
 /**
@@ -253,10 +253,10 @@ const worldcup = {
   },
 
   run: async () => {
-    const db = getLatestData(s3)
+    const db = worldcup.getLatestData(s3)
 
     // we care about ETag with this
-    const response = await getUrl(URL_MATCHES)
+    const response = await worldcup.getUrl(URL_MATCHES)
 
     worldcup.parseMatches(response, db)
     worldcup.updateLiveEvents(db)
