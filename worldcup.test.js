@@ -22,3 +22,13 @@ test('internet disabled', async () => {
   const resp = await worldcup.request(options, data)
   expect(resp).toStrictEqual({ data: 'value' })
 })
+
+test('getUrl', async () => {
+  const url = 'https://example.com/foo'
+  const scope = nock('https://example.com')
+    .get('/foo')
+    .reply(200, {value: 'bar'})
+
+  const resp = await worldcup.getUrl(url)
+  expect(resp).toStrictEqual({ value: 'bar' })
+})

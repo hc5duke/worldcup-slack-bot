@@ -26,7 +26,9 @@
  */
 
 const AWS   = require('aws-sdk')
-const https = require('https');
+const https = require('https')
+const qs    = require('querystring')
+const url   = require('url')
 
 const s3    = new AWS.S3();
 
@@ -145,6 +147,19 @@ const worldcup = {
     }
   },
 
+  getUrl: (urlString, headers) => {
+    const u = url.parse(urlString)
+    const options = {
+      hostname: u.hostname,
+      port:     443,
+      path:     u.path,
+      method:   'GET',
+      headers:  headers,
+    }
+
+    return worldcup.request(options)
+  },
+
   // use https.request as async
   request: (options, data) => {
     return new Promise((resolve, reject) => {
@@ -165,15 +180,38 @@ const worldcup = {
         reject(err);
       });
 
-      req.write(data)
+      if (data) {
+        req.write(data)
+      }
+
       req.end();
     });
   },
 
   postToSlack: (text, attachmentText) => {
+    const options = {
+      token:        SLACK_TOKEN,
+      channel:      SLACK_CHANNEL,
+      username:     SLACK_BOT_NAME,
+      icon_url:     SLACK_BOT_AVATAR,
+      unfurl_links: 1,
+      parse:        'full',
+      pretty:       1,
+      text:         text
+    }
+
+    if (attachmentText) {
+      options.attachments = [
+        { text: attachmentText }
+      ]
+    }
+
+    return request(URL_SLACK + '?' + qs.encode(options))
   },
 
-  getEventPlayerAlias: eventPlayerId => {
+  getEventPlayerAlias: async eventPlayerId => {
+    const response = await request(URL_PLAYERS + eventPlayerId)
+    return response.Alias[0].Description
   },
 
   run: () => {
