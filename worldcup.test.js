@@ -1,7 +1,7 @@
 const nock = require('nock');
-const worldcup = require('./worldcup')
+const wc = require('./worldcup')
 
-test('internet disabled', async () => {
+test('.request', async () => {
   const data = JSON.stringify({ foo: 'bar' })
 
   const options = {
@@ -19,16 +19,39 @@ test('internet disabled', async () => {
     .post('/hello', { foo: 'bar' })
     .reply(200, { data: 'value' })
 
-  const resp = await worldcup.request(options, data)
+  const resp = await wc.request(options, data)
   expect(resp).toStrictEqual({ data: 'value' })
 })
 
-test('getUrl', async () => {
+
+test('.getUrl', async () => {
   const url = 'https://example.com/foo'
   const scope = nock('https://example.com')
     .get('/foo')
     .reply(200, {value: 'bar'})
 
-  const resp = await worldcup.getUrl(url)
+  const resp = await wc.getUrl(url)
   expect(resp).toStrictEqual({ value: 'bar' })
+})
+
+test('.postUrl', async () => {
+  const data = {goo: 'ber'}
+  const url = 'https://example.com/foo'
+  const scope = nock('https://example.com')
+    .post('/foo', data)
+    .reply(200, {value: 'bar'})
+
+  const resp = await wc.postUrl(url, data)
+  expect(resp).toStrictEqual({ value: 'bar' })
+})
+
+test('.postToSlack', async () => {
+  const scope = nock('https://slack.com')
+    .post('/api/chat.postMessage')
+    .reply(200, {ok: true})
+
+  const subject = 'subject'
+  const details = 'details'
+  const resp = await wc.postToSlack(subject, details)
+  expect(resp.ok).toBe(true)
 })
