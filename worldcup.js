@@ -28,13 +28,13 @@
 const AWS   = require('aws-sdk')
 const https = require('https')
 const qs    = require('querystring')
-const url   = require('url')
+const URL   = require('url')
 
 const s3    = new AWS.S3();
 
 // Slack stuff
 const SLACK_TOKEN      = process.env.SLACK_TOKEN
-const SLACK_CHANNEL    = '#test-circle-ci-app'
+const SLACK_CHANNEL    = process.env.SLACK_CHANNEL
 const SLACK_BOT_NAME   = 'WorldCup Bot'
 const SLACK_BOT_AVATAR = 'https://i.imgur.com/Pd0cpqE.png'
 const DEBUG_MODE       = true
@@ -79,7 +79,7 @@ const i18n = {
     'el final de la prórroga',
     'tanda de penales',
   ],
-  'en-GB': [
+  'en-US': [
     'The match between',
     'is about to start',
     'Yellow card',
@@ -147,10 +147,6 @@ const URL_SLACK   = 'https://slack.com/api/chat.postMessage'
 const URL_PLAYERS = 'https://api.fifa.com/api/v1/players/'
 const URL_MATCHES = 'https://api.fifa.com/api/v1/calendar/matches' + '?' + qs.encode(MATCH_OPTS)
 
-/**
- * Below this line, you should modify at your own risk
- */
-
 const worldcup = {
   getLatestData: async (s3) => {
     try {
@@ -171,16 +167,35 @@ const worldcup = {
   },
 
   getUrl: (urlString, headers) => {
-    const u = url.parse(urlString)
+    const url = URL.parse(urlString)
     const options = {
-      hostname: u.hostname,
+      hostname: url.hostname,
       port:     443,
-      path:     u.path,
+      path:     url.path,
       method:   'GET',
       headers:  headers,
     }
 
     return worldcup.request(options)
+  },
+
+  postUrl: (urlString, data, headers = {}) => {
+    const url = URL.parse(urlString)
+    const dataString = JSON.stringify(data)
+
+    headers['Content-Type'] = 'application/json; charset=utf-8'
+    headers['Content-Length'] = dataString.length
+    const options = {
+      hostname: url.hostname,
+      port:    443,
+      path:    url.path,
+      method:  'POST',
+      headers: headers,
+    }
+
+    debug(options)
+
+    return worldcup.request(options, dataString)
   },
 
   // use https.request as async
@@ -212,14 +227,11 @@ const worldcup = {
   },
 
   postToSlack: (text, attachmentText) => {
+    const headers = {
+      Authorization: 'Bearer ' + SLACK_TOKEN
+    }
     const options = {
-      token:        SLACK_TOKEN,
       channel:      SLACK_CHANNEL,
-      username:     SLACK_BOT_NAME,
-      icon_url:     SLACK_BOT_AVATAR,
-      unfurl_links: 1,
-      parse:        'full',
-      pretty:       1,
       text:         text
     }
 
@@ -229,11 +241,13 @@ const worldcup = {
       ]
     }
 
-    return getUrl(URL_SLACK + '?' + qs.encode(options))
+    debug('slack url', URL_SLACK)
+    debug('slack opts', options)
+    return worldcup.postUrl(URL_SLACK, options, headers)
   },
 
   getEventPlayerAlias: async eventPlayerId => {
-    const response = await getUrl(URL_PLAYERS + eventPlayerId)
+    const response = await worldcup.getUrl(URL_PLAYERS + eventPlayerId)
     return response.Alias[0].Description
   },
 
@@ -246,7 +260,18 @@ const worldcup = {
     }
   },
 
-  updateLiveEvents: db => {
+  postLiveEvents: async db => {
+    homeTeamName = 'S. Korea'
+    awayTeamName = 'Germany'
+    eventPlayerAlias = 'Choi'
+    matchTime = "23'"
+    score = '1:0'
+    subject = ':zap: ' + i18n[LOCALE][0] + ' '
+      + homeTeamName + ' / '
+      + awayTeamName + ' '
+      + i18n[LOCALE][8] + '!'
+    details = eventPlayerAlias + ' (' + matchTime + ') ' + score;
+    return worldcup.postToSlack(subject, details)
   },
 
   saveLatestData: (s3, db) => {
@@ -259,9 +284,15 @@ const worldcup = {
     const response = await worldcup.getUrl(URL_MATCHES)
 
     worldcup.parseMatches(response, db)
-    worldcup.updateLiveEvents(db)
-    worldcup.saveLatestData(s3, db)
+    await worldcup.postLiveEvents(db)
+    await worldcup.saveLatestData(s3, db)
   }
+}
+
+const debug = (title, info) => {
+  if (!DEBUG_MODE) return
+
+  console.log(title, info)
 }
 
 exports.handler = async (event, context) => {
