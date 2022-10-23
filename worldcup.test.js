@@ -19,6 +19,6 @@ test('internet disabled', async () => {
     .post('/hello', { foo: 'bar' })
     .reply(200, { data: 'value' })
 
-  const resp = await worldcup.helpers.request(options, data)
+  const resp = await worldcup.request(options, data)
   expect(resp).toStrictEqual({ data: 'value' })
 })

@@ -116,13 +116,17 @@ const PERIOD_1ST_ET   = 7;
 const PERIOD_2ND_ET   = 9;
 const PERIOD_PENALTY  = 11;
 
+
+// URLs
+const URL_SLACK   = 'https://slack.com/api/chat.postMessage'
+const URL_PLAYERS = 'https://api.fifa.com/api/v1/players/'
+const URL_MATCHES = 'https://api.fifa.com/api/v1/calendar/matches'
+
 /**
  * Below this line, you should modify at your own risk
  */
 
-const worldcup = {}
-
-worldcup.helpers = {
+const worldcup = {
   getLatestData: async (s3) => {
     try {
       var getParams = {
@@ -164,7 +168,20 @@ worldcup.helpers = {
       req.write(data)
       req.end();
     });
+  },
+
+  postToSlack: (text, attachmentText) => {
+  },
+
+  getEventPlayerAlias: eventPlayerId => {
+  },
+
+  run: () => {
   }
+}
+
+exports.handler = async (event, context) => {
+  worldcup.run()
 }
 
 module.exports = worldcup
