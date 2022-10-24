@@ -38,8 +38,6 @@ const SLACK_CHANNEL    = process.env.SLACK_CHANNEL
 const SLACK_BOT_NAME   = 'WorldCup Bot'
 const SLACK_BOT_AVATAR = 'https://i.imgur.com/Pd0cpqE.png'
 const DEBUG_MODE       = true
-const S3_BUCKET        = process.env.S3_BUCKET
-const S3_KEY           = process.env.S3_KEY
 
 // Set to the language for updates
 const LOCALE = 'en-US'
@@ -148,22 +146,32 @@ const URL_PLAYERS = 'https://api.fifa.com/api/v1/players/'
 const URL_MATCHES = 'https://api.fifa.com/api/v1/calendar/matches' + '?' + qs.encode(MATCH_OPTS)
 
 const worldcup = {
-  getLatestData: async (s3) => {
-    try {
-      var getParams = {
-        Bucket: S3_BUCKET,
-        Key:    S3_KEY
+  // use https.request as async
+  request: (options, data) => {
+    return new Promise((resolve, reject) => {
+      const req = https.request(options, (res) => {
+        res.setEncoding('utf8');
+        let responseBody = '';
+
+        res.on('data', (chunk) => {
+          responseBody += chunk;
+        });
+
+        res.on('end', () => {
+          resolve(JSON.parse(responseBody));
+        });
+      });
+
+      req.on('error', (err) => {
+        reject(err);
+      });
+
+      if (data) {
+        req.write(data)
       }
-      var obj = await s3.getObject(getParams).promise()
-      return obj.Body
-    } catch(e) {
-      console.error(e)
-    } finally {
-      return {
-        liveMatches: [],
-        etag: {}
-      }
-    }
+
+      req.end();
+    });
   },
 
   getUrl: (urlString, headers) => {
@@ -198,32 +206,22 @@ const worldcup = {
     return worldcup.request(options, dataString)
   },
 
-  // use https.request as async
-  request: (options, data) => {
-    return new Promise((resolve, reject) => {
-      const req = https.request(options, (res) => {
-        res.setEncoding('utf8');
-        let responseBody = '';
-
-        res.on('data', (chunk) => {
-          responseBody += chunk;
-        });
-
-        res.on('end', () => {
-          resolve(JSON.parse(responseBody));
-        });
-      });
-
-      req.on('error', (err) => {
-        reject(err);
-      });
-
-      if (data) {
-        req.write(data)
+  getLatestData: async (s3) => {
+    try {
+      var getParams = {
+        Bucket: process.env.S3_BUCKET,
+        Key:    process.env.S3_KEY
       }
+      var obj = await s3.getObject(getParams).promise()
+      return JSON.parse(obj.Body)
+    } catch(e) {
+      console.error(e)
+    }
 
-      req.end();
-    });
+    return {
+      liveMatches: [],
+      etag: {}
+    }
   },
 
   postToSlack: (text, attachmentText) => {
